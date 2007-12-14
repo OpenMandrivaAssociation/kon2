@@ -2,7 +2,7 @@ Summary:	KON - Kanji ON Linux console
 Summary(ja):	KON - 漢字コンソール
 Name:		kon2
 Version:	0.3.9b
-Release:	%mkrel 7
+Release:	%mkrel 8
 License:	BSD
 Group:		System/Internationalization
 Source0:	ftp://ftp.linet.gr.jp/pub/KON/kon2-%{version}.tar.bz2
@@ -13,7 +13,7 @@ Patch0:		kon2-iso8859.diff
 Patch1:		kon2-debian_jumbo_patch.diff
 BuildRequires:	glibc-static-devel
 Requires:	ncurses >= 4.2-10vl1 locales-ja
-Exclusivearch:	%{ix86}
+Exclusivearch:	%{ix86} x86_64
 BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 %description
