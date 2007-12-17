@@ -14,7 +14,6 @@ Patch1:		kon2-debian_jumbo_patch.diff
 BuildRequires:	glibc-static-devel
 Requires:	ncurses >= 4.2-10vl1 locales-ja
 Exclusivearch:	%{ix86} x86_64
-BuildRoot:	%{_tmppath}/%{name}-%{version}-buildroot
 
 %description
 KON displays kanji characters on Linux console screen.
