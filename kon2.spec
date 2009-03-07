@@ -2,7 +2,7 @@ Summary:	KON - Kanji ON Linux console
 Summary(ja):	KON - 漢字コンソール
 Name:		kon2
 Version:	0.3.9b
-Release:	%mkrel 9
+Release:	%mkrel 10
 License:	BSD
 Group:		System/Internationalization
 Source0:	ftp://ftp.linet.gr.jp/pub/KON/kon2-%{version}.tar.bz2
