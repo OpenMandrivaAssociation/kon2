@@ -1,0 +1,1457 @@
+diff -Naur kon2-0.3.9b/.config kon2-0.3.9b.oden/.config
+--- kon2-0.3.9b/.config	1970-01-01 01:00:00.000000000 +0100
++++ kon2-0.3.9b.oden/.config	2007-03-18 18:43:57.000000000 +0100
+@@ -0,0 +1,24 @@
++INCDIR  = /home/ishikawa/work/kon2/kon2-0.3.9b/include
++LIB     = /home/ishikawa/work/kon2/kon2-0.3.9b/lib/libgon.a
++
++TOPDIR	= 
++BINDIR	= $(TOPDIR)/usr/bin
++LIBDIR	= $(TOPDIR)/etc
++MANDIR	= $(TOPDIR)/usr/share/man/ja/man1
++CONFIG_NAME = kon.cfg
++OPTS    = -DCONFIG_NAME=\"$(LIBDIR)/$(CONFIG_NAME)\" -I$(INCDIR)
++ifdef	MINI_KON
++CFLAGS  += -DMINI_KON -O2 -Wall $(OPTS)
++else
++CFLAGS  += -O2 -Wall $(OPTS)
++endif
++LD      = gcc $(CFLAGS)
++RM      = rm -f
++INSTALL = install -c -s
++
++HAS_VGA = HAS_VGA
++HAS_MOUSE = HAS_MOUSE
++FLD_MINIX = FLD_MINIX
++FLD_BDF = FLD_BDF
++FLD_FONTX2 = FLD_FONTX2
++USE_STATICFONT = USE_STATICFONT
+diff -Naur kon2-0.3.9b/config.out kon2-0.3.9b.oden/config.out
+--- kon2-0.3.9b/config.out	1970-01-01 01:00:00.000000000 +0100
++++ kon2-0.3.9b.oden/config.out	2007-03-18 18:43:57.000000000 +0100
+@@ -0,0 +1,20 @@
++build MINI KON
++MINI_KON n
++Support VGA driver
++HAS_VGA y
++Support J31SX driver
++HAS_J31SX n
++Support MOUSE driver
++HAS_MOUSE y
++Install Minix/V font loader
++FLD_MINIX y
++Install $fontx2 font loader
++FLD_BDF y
++Install .bdf font loader
++FLD_FONTX2 y
++Install J3100ROM font loader
++FLD_J31ROM n
++Use ROM font
++USE_ROMFONT n
++Use Static font
++USE_STATICFONT y
+diff -Naur kon2-0.3.9b/doc/kon.1 kon2-0.3.9b.oden/doc/kon.1
+--- kon2-0.3.9b/doc/kon.1	1996-09-05 02:13:47.000000000 +0200
++++ kon2-0.3.9b.oden/doc/kon.1	2007-03-18 18:43:57.000000000 +0100
+@@ -267,9 +267,9 @@
+ .SH 【ファイル】
+ .if n .ta 2.5i
+ .if t .ta 1.8i
+-/usr/local/lib/kon.cfg	環境設定ファイル
++/etc/kon.cfg	環境設定ファイル
+ .br
+-/usr/lib/font/*		フォントファイル
++/usr/share/fonts/kon/*		フォントファイル
+ .SH 【関連項目】
+ swkon(1), fld(1)
+ .SH 【注意事項】
+diff -Naur kon2-0.3.9b/doc/kon.1.eng kon2-0.3.9b.oden/doc/kon.1.eng
+--- kon2-0.3.9b/doc/kon.1.eng	1970-01-01 01:00:00.000000000 +0100
++++ kon2-0.3.9b.oden/doc/kon.1.eng	2007-03-18 18:43:57.000000000 +0100
+@@ -0,0 +1,290 @@
++.TH KON 1 "Sep 5, 1996"
++.UC 4
++.SH NAME
++KON \- Kanji cONsole emulator
++.SH SYNOPSYS
++.B kon
++[
++.B video
++]
++[
++.B -capability
++value ...
++]
++.SH DESCRIPTION
++\fIKON\fP is a program to display Kanji characters on a virtual
++console of \fILinux\fP and \fIFreeBSD\fP.
++
++\fIKON\fP uses
++.B pty(4)
++to hook the I/O for console, and displays Kanji characters by
++drawing the image of them on \fIVGA\fP or \fIDCGA\fP.
++
++\fIKON\fP can be invoked from another \fIKON\fP. In this situation,
++new \fIKON\fP runs on newly opened virtual console.
++.SH OPTIONS
++.PP
++\fIKON\fP has ability to interpret some options to specify the video
++driver to be used, or some other environmental conditions.
++.B video
++is to specify one of video driver entries written in \fIkon.cfg\fP.
++If this option is omitted, then \fINORMAL\fP video driver is used.
++Some settings as such as \fICursorInterval\fP can be overridden by
++.B -capability
++options. For example,
++
++.br
++   % kon -CursorInterval 10
++.br
++
++invokes the kon with setting the value of \fICursorInterval\fP to 10.
++
++.PP
++.SH CONFIGURATION
++\fIkon.cfg\fP is the file to configure the behaviour of \fIKON\fP.
++Video drivers and Palettes used by \fIKON\fP is specified in this file.
++The format of an entry for this file is:
++.TP 8
++   \fIEntryName\fP:[\fIAlias1\fP:\fIAlias2\fP:...]
++   \fIValue_for_Entry\fP
++.PP
++There are no distinction about case (upper/lower) in \fIEntryName\fP.
++Any line for "\fIValue_for_Entry\fP" must start with \fITAB\fP.
++The part from \fI#\fP to the end of line, is treated as comment.
++.PP
++Types of "\fIValue_for_Entry\fP" are: 
++.TP 10
++\fIboolean\fP
++On / Off (no distinction about upper/lower case)
++.TP 10
++\fIchoice\fP
++select one from options (no distinction about upper/lower case)
++.TP 10
++\fInumeric\fP
++Decimal Number
++.TP 10
++\fIstring\fP
++Each entry has it's special format.
++.PP
++Following two entries are essential in this configuration file:
++.TP 4
++\fINORMAL\fP(string)
++specify the video driver to be used. Available options are:
++
++.nf
++\fIVGA\fP      driver for VGA, SVGA, EGA
++\fIVGAFM\fP    same above but with ability of font deformation
++\fIJ3100SX\fP  driver for TOSHIBA J3100SX (DCGA)
++.fi
++
++\fIVGA\fP and \fIVGAFM\fP require some parameters for
++ \fIVGA register value\fP, screen size(Number of dots),
++Width(Number of characters), Hight(Number of lines).
++
++Users can use this entry to change the total number of characters
++to be displayed, but except for VGA resolution(640x480),
++the number of characters that can be seen for the specified 
++\fIVGA register value\fP, depends the video cards.
++Default \fIkon.cfg\fP set \fINORMAL\fP as an alias for the standard
++VGA, and has some alternate entries for some video cards.
++
++.TP 4
++\fISTARTUP\fP(string)
++specify the command to be invoked at the start of \fIKON\fP.
++One line for each commands, but multiple lines can be specified.
++The command to load the fonts must be specified here.
++When the fonts for ASCII alphanumeric have not been loaded,
++then \fIVGA font\fP is used.
++
++.nf
++.I for the fonts file which is not compressed
++  <fontloader> <Font file for ASCII alphanumeric>
++  <fontloader> <Kanji/Kana font file>
++.I for the fonts file which is compressed
++  zcat <compressed font fine for ASCII alphanumeric> | <fontloader>
++  zcat <compressed font file for Kanji/Kana> | <fontloader>
++.fi
++.PP
++Next entry is required when VGA or VGAFM is specified as video driver:
++.TP
++\fIPELS\fP(string)
++specify the Pallete. The format is the pallette value(decimal) for
++R,G,B in each line, and 16 lines are there total.
++Default \fIkon.cfg\fP has \fISTDPEL\fP and \fIREVPEL\fP entries.
++\fISTDPEL\fP is the standard palette, and \fIREVPEL\fP is the reverse.
++\fIPELS\fP can be specified as an alias for used entry.
++.PP
++Other entries are:
++.TP 4
++\fIMOUSE\fP(choice)
++specify the mouse driver. Select a type of mouse from
++Microsoft, MouseSystems, BusMouse, MMSeries, Logitech, None
++None is default.
++.TP 4
++\fIMouseBaud\fP(choice)
++specify the baud rate for serial mouse. Select one from
++1200, 2400, 4800, 9600. Default is 1200. This is enabled
++when MOUSE is specified as others than NONE or BusMousees.
++.TP 4
++\fIMouseDev\fP(string)
++specify the device name of Mouse. Default is /dev/mouse.
++This is enabled when \fIMOUSE\fP has the entry other than None.
++.TP 4
++\fIMouse3Buttons\fP(boolean)
++specify if the Mouse is 3-button type. Default is Off.
++.TP 4
++\fIHardScroll\fP(boolean)
++specify wheter hardware scroll is used or not. Default is On.
++This is effective for VGA, VGAFM, J3100SX.
++.TP 4
++\fIBeepCounter\fP(numeric)
++specify the length of beep sound in the unit of 1/100 sec.
++Default is 5.
++.TP 4
++\fICursorInterval\fP(numeric)
++specify the interval of cursor blinking in the unit of 1/10 sec.
++Default is 4. To stop the blinking, specify 0.
++.TP 4
++\fISaveTime\fP(numeric)
++specify the amount of time to start the screen saver in the unit
++of minutes. Default is 4.
++.TP 4
++\fIKanjiCursor\fP(boolean)
++specify if wide cursor is used on Kanji characters, or ot.
++Default is On.
++.TP 4
++\fICursorTop\fP(numeric),\fICursorBottom\fP(numeric)
++specify the size of cursor box using these two entries.
++.nf
++      0 +--------+
++        |        |
++        |--------| <-- CursorTop
++        |********|
++        |********|
++        |********|
++        |********|
++        |********|
++     15 +--------+ <-- CursorBottom
++.fi
++These are effective for VGA, VGAFM, and CGA drivers.
++.TP 4
++\fIBoxCursor\fP(boolean)
++specify if the shape of cursor is box or under line.
++Default is Off. Effective for only J3100SX driver.
++.TP 4
++\fISavePlane3\fP(boolean)
++specify if the font data on 3rd page in VGA memory is saved.
++This is useful for Trident video cards. Default is Off.
++Effective for VGA, VGAFM drivers.
++.TP 4
++\fIVgaFontOffset\fP(numeric)
++specify the offset value for \fIVGA font\fP. Default is 0.
++When the \fIVGA fonts\fP are used as ASCII alphanumeric font,
++there are some PCs the lower parts of characters are missing.
++In those circumstance, this entry can be used to adjust the position
++of displayed characters.
++.TP 4
++\fICoding\fP(string)
++specify the default font and the coding in 1bit.
++The formats are:
++
++.br
++	<SB font> <DB font> [EUC|SJIS]
++
++SB font and DB font can be selected from:
++.PP
++.TP 4
++    SB font: Single Byte font
++	ISO8859-1,ISO8859-2,ISO8859-3,ISO8859-4,ISO8859-5,
++	ISO8859-6,ISO8859-7,ISO8859-8,ISO8859-9,
++	JISX0201.1976-0
++.PP
++.TP 4
++    DB font: Double Byte font
++	GB2312.1980-1,JISX0208.1983-0,KSC5601,BIG5
++.PP
++.TP 4
++\fIStartupMessage\fP(boolean)
++specify if the greeting message is shown at startup. Default is On.
++.PP
++.SH Configuratino for High resolution screen.
++When VGA or VGAFM is used as video driver, \fIKON\fP can use the
++wider space for text area with the fine-tuing at \fIkon.cfg\fP.
++.TP 4
++\fIEntryName\fP:
++.br
++	<\fIVGA\fP or \fIVGAFM\fP>
++.br
++	[decimation factor for \fIVGAFM\fP]
++.br
++	<HR> <HS> <HE> <HFL> <VR> <VS> <VE> <VFL>
++.br
++	<\fIClock Number\fP>
++.br
++	<\fILine Width - 1\fP> <\fILine Numbers - 1\fP>
++.PP
++Control parameter in 3rd line for VGAFM (2nd line for VGA)
++consists of 8 decimal numbers. These numbers are similar
++as the video mode lines in XF86Config.
++\fIKON\fP can emulate text upto 800x600 resolution.
++.TP 4
++Screen control parameters:
++.br
++.B HR
++total dot number in horizontal
++.br
++.B HS
++the start point of horizontal sync
++.br
++.B HE
++the end point of horizontal sync
++.br
++.B HFL
++Total number of horizontal frames
++.br
++.B VR
++number of vertical lines
++.br
++.B VS
++the start point of vertical sync
++.br
++.B VE
++the end point of vertical sync
++.br
++.B VFL
++total number of vertical frames
++.PP
++\fIClock Number\fP selects the clock frequency for the mode of
++that entry. Only lowest 2 bit is effective, i.e. a number from 0
++to 3 can be specified here.
++The last line specifies the area for text screen to emulate.
++.SH FILES
++.if n .ta 2.5i
++.if t .ta 1.8i
++/etc/kon.cfg	Configuratin file
++.br
++/usr/share/fonts/kon/*		Font files
++.SH See Also
++
++.\" swkon(1), fld(1)
++.SH NOTE
++- When text screen is in high resolution mode at 
++  the start of \fILinux\fP, \fIKON\fP can not work 
++  successfully since the size of \fIVGA font\fP is 
++  different from usual.
++.br
++- When multiple entries with same name in \fIkon.cfg\fP, 
++ the first entry is used. The maximum length of one line 
++ is 255 bytes.
++.br
++.\" - If \fIX Window System\fP can not start from \fIKON\fP, use
++.\"   \fIswkon(1)\fP to enter text mode, then disconnect mouse.
++.\"   After that, \fIX Window System\fP may start up.
++.SH AUTHORS
++.nf
++MANABE Takashi	<manabe@papilio.tutics.tut.ac.jp>
++MAEDA Atusi	<mad@nak.math.keio.ac.jp>
++KOMEDA Shinji	<komeda@ics.es.osaka-u.ac.jp>
++YOSHIDA Kensyu	<kensyu@rabbit.is.s.u-tokyo.ac.jp>
++obuk@MIX
++.fi
+diff -Naur kon2-0.3.9b/font/bdf.c kon2-0.3.9b.oden/font/bdf.c
+--- kon2-0.3.9b/font/bdf.c	2000-03-21 08:30:52.000000000 +0100
++++ kon2-0.3.9b.oden/font/bdf.c	2007-03-18 18:43:57.000000000 +0100
+@@ -39,14 +39,20 @@
+ #include	<fnld.h>
+ 
+ extern struct fontInfo fi;
+-extern forceLoad;
++extern int forceLoad;
++
++int buffer_error()
++{
++  fprintf(stderr,"buffer overflow\n");
++  exit(1);  
++}
+ 
+ u_char	*FontLoadBdf(fp)
+ FILE *fp;
+ {
+     char *fdata = NULL, line[256], *p, *w, reg[256];
+     u_char ch, ch2;
+-    int	num, width, high, i, code, data, k, n;
++    int	num, width, high, i, code = 0, data, k, n;
+     struct fontRegs *fReg;
+     struct fontLoaderRegs *fldReg;
+ 
+@@ -61,23 +67,38 @@
+ 	    p = line + sizeof("FONTBOUNDINGBOX");
+ 	    sscanf(p, "%d %d", &width, &high);
+ 	} else if (!strncmp("CHARSET_REGISTRY", line, 16)) {
+-	    p = line + sizeof("CHARSET_REGISTRY");
+-	    while(*p != '"') p ++;
++	    p = line + sizeof("CHARSET_REGISTRY") - 1;
++	    while(*p != '"') {
++	      p ++;
++	      if (p - line > 255) buffer_error();
++	    }
+ 	    w = ++p;
+-	    while(*p != '"') p ++;
++	    while(*p != '"') {
++	      p ++;
++	      if (p - line > 255) buffer_error();
++	    }
+ 	    *p = '\0';
+-	    strcpy(reg, w);
++	    strncpy(reg, w, sizeof(reg));
+ 	} else if (!strncmp("CHARSET_ENCODING", line, 16)) {
+-	    p = line + sizeof("CHARSET_ENCODING");
+-	    while(*p != '"') p ++;
++	    p = line + sizeof("CHARSET_ENCODING") - 1;
++	    while(*p != '"') {
++	      p ++;
++	      if (p - line > 255) buffer_error();
++	    }
+ 	    w = ++p;
+-	    while(*p != '"') p ++;
++	    while(*p != '"') {
++	      p ++;
++	      if (p - line > 255) buffer_error();
++	    }
+ 	    *p = '\0';
+-	    strcat(reg, "-");
+-	    strcat(reg, w);
++	    if (strlen(reg) + 1 + strlen(w) + 1 < sizeof(reg)) {
++	      strcat(reg, "-");
++	      strcat(reg, w);
++	    } else
++	      buffer_error();
+ 	    fi.type = CodingByRegistry(reg);
+ 	} else if (!num && !strncmp("CHARS ", line, 6)) {
+-	    p = line + sizeof("CHARS");
++	    p = line + sizeof("CHARS") - 1;
+ 	    sscanf(p, "%d", &num);
+ 	    break;
+ 	}
+@@ -162,3 +183,4 @@
+     exit(0);
+ }
+ #endif
++
+diff -Naur kon2-0.3.9b/font/fld.c kon2-0.3.9b.oden/font/fld.c
+--- kon2-0.3.9b/font/fld.c	2000-03-19 11:47:06.000000000 +0100
++++ kon2-0.3.9b.oden/font/fld.c	2007-03-18 18:43:57.000000000 +0100
+@@ -33,6 +33,8 @@
+ #include	<fnld.h>
+ 
+ unsigned char *LoadFontFile();
++void UnloadShmem();
++void ShowFont();
+ 
+ extern struct fontInfo fi;
+ 
+@@ -44,7 +46,7 @@
+     int i, n;
+     FILE *fp = stdin;
+     enum {ST_ARG, ST_UNLOAD, ST_TYPE} st=ST_ARG;
+-    char *path, *type, *p;
++    char *path, *type = NULL, *p;
+     u_char *font;
+     int forceLoad=1;
+ 
+diff -Naur kon2-0.3.9b/font/fontx2.c kon2-0.3.9b.oden/font/fontx2.c
+--- kon2-0.3.9b/font/fontx2.c	1997-01-24 11:08:56.000000000 +0100
++++ kon2-0.3.9b.oden/font/fontx2.c	2007-03-18 18:43:57.000000000 +0100
+@@ -41,7 +41,7 @@
+ #include	<fnld.h>
+ 
+ extern struct fontInfo fi;
+-extern forceLoad;
++extern int forceLoad;
+ 
+ struct fontx {
+     char title[6];
+diff -Naur kon2-0.3.9b/font/j3100.c kon2-0.3.9b.oden/font/j3100.c
+--- kon2-0.3.9b/font/j3100.c	1997-01-24 11:09:29.000000000 +0100
++++ kon2-0.3.9b.oden/font/j3100.c	2007-03-18 18:43:57.000000000 +0100
+@@ -40,7 +40,8 @@
+ #include	<sys/types.h>
+ #include	<sys/socket.h>
+ #include	<sys/mman.h>
+-#include	<linux/mm.h>
++/* #include	<linux/mm.h> */
++#include <asm/page.h>
+ #include        <mem.h>
+ 
+ #include	<fnld.h>
+diff -Naur kon2-0.3.9b/font/minix.c kon2-0.3.9b.oden/font/minix.c
+--- kon2-0.3.9b/font/minix.c	1997-01-24 11:09:59.000000000 +0100
++++ kon2-0.3.9b.oden/font/minix.c	2007-03-18 18:43:57.000000000 +0100
+@@ -52,7 +52,7 @@
+ #define FH_MEMO_SIZE		508
+ 
+ extern struct fontInfo fi;
+-extern forceLoad;
++extern int forceLoad;
+ 
+ struct font_header {
+     short fnt_size;		/* bytes per one character bit patern */
+diff -Naur kon2-0.3.9b/include/config.h kon2-0.3.9b.oden/include/config.h
+--- kon2-0.3.9b/include/config.h	1970-01-01 01:00:00.000000000 +0100
++++ kon2-0.3.9b.oden/include/config.h	2007-03-18 18:43:57.000000000 +0100
+@@ -0,0 +1,70 @@
++
++/*
++ * KON2 - Kanji ON Console -
++ * Copyright (C) 1992, 1993 MAEDA Atusi (mad@math.keio.ac.jp)
++ * Copyright (C) 1992-1996 Takashi MANABE (manabe@papilio.tutics.tut.ac.jp)
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ *
++ * THIS SOFTWARE IS PROVIDED BY TAKASHI MANABE ``AS IS'' AND ANY
++ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED.  IN NO EVENT SHALL THE TERRENCE R. LAMBERT BE LIABLE
++ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
++ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
++ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
++ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
++ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
++ * SUCH DAMAGE.
++ * 
++ */
++
++/*
++	NOTE: This is automatically generated config.
++	>>>>>>>>>>>>>> DO NOT EDIT !! <<<<<<<<<<<<<<
++*/
++
++#ifndef	CONFIG_H
++#define	CONFIG_H
++
++
++/* build MINI KON */
++
++/* Support VGA driver */
++#define HAS_VGA
++
++/* Support J31SX driver */
++
++/* Support MOUSE driver */
++#define HAS_MOUSE
++
++/* Install Minix/V font loader */
++#define FLD_MINIX
++
++/* Install $fontx2 font loader */
++#define FLD_BDF
++
++/* Install .bdf font loader */
++#define FLD_FONTX2
++
++/* Install J3100ROM font loader */
++
++/* Use ROM font */
++
++/* Use Static font */
++#define USE_STATICFONT
++
++#ifdef	MINI_KON
++#define	PATH_MINIFONT	"/usr/lib/minikon.fnt"
++#undef	HAS_MOUSE
++#endif
++
++#endif
+diff -Naur kon2-0.3.9b/kbiff/kbiff.c kon2-0.3.9b.oden/kbiff/kbiff.c
+--- kon2-0.3.9b/kbiff/kbiff.c	1997-06-25 04:22:35.000000000 +0200
++++ kon2-0.3.9b.oden/kbiff/kbiff.c	2007-03-18 18:43:57.000000000 +0100
+@@ -24,13 +24,15 @@
+     time_t old_mtime=0;
+     int n, update=1;
+     struct stat st;
++    int bufflen;
+ 
+     if ((term = getenv("TERM")) == NULL
+ 	|| (mail = getenv("MAIL")) == NULL) exit(1);
+     setupterm(term, 1, &n);
+     if (n != 1) exit(1);
+     if (!has_status_line) exit(1);
+-    if ((buff = calloc(columns + 1, 1)) == NULL) exit(1);
++    bufflen = columns + 1;
++    if ((buff = calloc(bufflen, 1)) == NULL) exit(1);
+     putp(tparm(to_status_line, 0, 0));
+     putp(from_status_line);
+     fflush(stdout);
+@@ -39,14 +41,14 @@
+     while (1) {
+ 	if (!stat(mail, &st) && st.st_size) {
+ 	    if (st.st_mtime > old_mtime) {
+-		sprintf(buff, "New mail received %s",
+-			ctime(&st.st_mtime));
++		snprintf(buff, bufflen, "New mail received %s",
++			 ctime(&st.st_mtime));
+ 		update = 1;
+ 		old_mtime = st.st_mtime;
+ 	    }
+ 	} else {
+ 	    if (st.st_mtime > old_mtime) {
+-		sprintf(buff, "No mail");
++		snprintf(buff, bufflen, "No mail");
+ 		update = 1;
+ 		old_mtime = st.st_mtime;
+ 	    }
+diff -Naur kon2-0.3.9b/lib/getcap.c kon2-0.3.9b.oden/lib/getcap.c
+--- kon2-0.3.9b/lib/getcap.c	1997-01-24 08:09:09.000000000 +0100
++++ kon2-0.3.9b.oden/lib/getcap.c	2007-03-18 18:43:57.000000000 +0100
+@@ -73,6 +73,12 @@
+ 		fprintf(stderr, "cap %s redefined (default %s)\r\n", name,
+ 			def_value ? def_value : "None");
+ #endif
++		/* release previous value - ukai */
++		if (cp->name)
++		    free(cp->name);
++		if (cp->def_value)
++		    free(cp->def_value);
++
+ 		cp->name = strdup(name);
+ 		cp->func = func;
+ 		if (def_value)
+@@ -223,6 +229,9 @@
+ 		/* Protected capability. */
+ 		return FAILURE;
+ 	}
++	/* release previous value - ukai */
++	if (cp->arg)
++	    free(cp->arg);
+ 	cp->arg = strdup(value);
+ #ifdef	DEBUG
+ 	fprintf(stderr, "Setting arg for %s to %s\r\n", capName, value);
+@@ -234,8 +243,9 @@
+ 
+ bool BoolConf(const char *confstr)
+ {
+-	char name[MAX_COLS];
+-	sscanf(confstr, "%s", name);
++	char *name;
++	name = malloc(strlen(confstr) + 1);
++	sscanf(confstr, "%s", name);	/* its safe because name[strlen(confstr)+1] */
+ 	if (strcasecmp(name, "On") == 0 ||
+ 	    strcasecmp(name, "True") == 0) {
+ 		return TRUE;
+diff -Naur kon2-0.3.9b/lib/sockface.c kon2-0.3.9b.oden/lib/sockface.c
+--- kon2-0.3.9b/lib/sockface.c	2000-03-19 12:48:13.000000000 +0100
++++ kon2-0.3.9b.oden/lib/sockface.c	2007-03-18 18:43:57.000000000 +0100
+@@ -86,9 +86,11 @@
+ 	if (ioctl(fd, VT_GETSTATE, &vs) < 0) {
+ 		return EOF;
+ 	}
+-	sprintf(sa->sa_data, "%s%d", SOCKET_BASENAME, vs.v_active);
++	snprintf(sa->sa_data, sizeof(sa->sa_data),
++		 "%s%d", SOCKET_BASENAME, vs.v_active);
+ #elif defined(__FreeBSD__)
+-	sprintf(sa->sa_data, "%s", SOCKET_BASENAME);
++	snprintf(sa->sa_data, sizeof(sa->sa_data),
++		 "%s", SOCKET_BASENAME);
+ #endif
+ 	return(0);
+ }
+diff -Naur kon2-0.3.9b/Makefile.linux kon2-0.3.9b.oden/Makefile.linux
+--- kon2-0.3.9b/Makefile.linux	2000-04-10 09:48:37.000000000 +0200
++++ kon2-0.3.9b.oden/Makefile.linux	2007-03-18 18:43:57.000000000 +0100
+@@ -47,7 +47,7 @@
+ 		mv $(LIBDIR)/$(CONFIG_NAME) $(LIBDIR)/$(CONFIG_NAME)'.org';\
+ 		echo $(LIBDIR)/$(CONFIG_NAME)': file exists ... renamed !!';\
+ 	fi
+-	@install -c $(CONFIG_NAME).linux $(LIBDIR)/${CONFIG_NAME}
++	@install -m 644 -c $(CONFIG_NAME).linux $(LIBDIR)/${CONFIG_NAME}
+ 	install -c doc/kon.1 $(MANDIR)
+ 
+ makedir:
+diff -Naur kon2-0.3.9b/src/child.c kon2-0.3.9b.oden/src/child.c
+--- kon2-0.3.9b/src/child.c	2000-04-09 03:21:45.000000000 +0200
++++ kon2-0.3.9b.oden/src/child.c	2007-03-18 18:43:57.000000000 +0100
+@@ -39,11 +39,27 @@
+ #include	<version.h>
+ #include	<vc.h>
+ 
++#define _USE_BSD
++#include <sys/types.h>
++#include <sys/resource.h>
++#include <sys/wait.h>
++
+ static char *startupStr, *execProg;
++static char *execProgArgs[256];
++
++void PerrorExit ();
+ 
+-int	ConfigExecProg(const char *string)
++int	ConfigExecProg(const char *string, char *args[])
+ {
++	int i=0;
+ 	execProg = strdup(string);
++	for (i = 0; i < 256; i++) {
++	  if (args[i]) 
++	      execProgArgs[i] = args[i];
++	  else
++	      break;
++	}
++	execProgArgs[i]=NULL;
+ 	return SUCCESS;
+ }
+ 
+@@ -55,14 +71,42 @@
+ 	return SUCCESS;
+ }
+ 
+-static void	RunStartupCmd(void)
++void	RunStartupCmd(void)
+ {
+ 	char *p;
++	int StartupPid;
++	int stat;
+ 
+ 	p = strtok(startupStr, "\n");
+ 	while(p) {
+-		system(p);
+-		p = strtok(NULL, "\n");
++	  /* fork handler */
++	  if ((StartupPid = fork()) < 0) {
++	    PerrorExit("fork");
++	  }
++	  if (StartupPid != 0) {
++	    /* I'm parent. */
++
++	    wait4(StartupPid, &stat, 0, 0);
++	    if(WIFEXITED(stat) == 0)
++	      PerrorExit("StartupCmd");
++
++	  } else {
++
++	    /* I'm child */
++	    char *argv[4];
++
++	    /* run as user, not effective user root */
++	    setgid(getgid());
++	    setuid(getuid());
++
++	    argv[0] = "sh";
++	    argv[1] = "-c";
++	    argv[2] = p;
++	    argv[3] = NULL;
++	    execv("/bin/sh", argv);
++	    _exit(0);
++	  }
++	  p = strtok(NULL, "\n");
+ 	}
+ }
+ 
+@@ -95,20 +139,18 @@
+ 
+ #ifndef	MINI_KON
+ 	char	*shell;
+-	setgid(getgid());
+-	setuid(getuid());
+-
+-	RunStartupCmd();
++        setgid(getgid());
++        setuid(getuid());
+ #endif
+ 
+ #if defined(linux)
+ #ifdef	MINI_KON
+-	strcpy(buff, "TERM=linux");
++	strcpy(buff, "TERM=linux");	/* ok - buff[256] */
+ #else
+-	strcpy(buff, "TERM=kon");
++	strcpy(buff, "TERM=kon");	/* ok - buff[256] */
+ #endif
+ #elif defined(__FreeBSD__)
+-	sprintf(buff,"TERM=vt100");
++	sprintf(buff,"TERM=vt100");	/* ok - buff[256] */
+ #endif
+ 
+ 	tcap = strdup(buff);
+@@ -133,13 +175,13 @@
+ #endif
+ 
+ 	if (execProg)
+-	    execlp(execProg, execProg, 0);
++	    execvp(execProg, execProgArgs);
+ 	else {
+ 	    if ((execProg = getenv("SHELL")) == NULL)
+ 		execProg = "/bin/sh";
+ 	    if ((tail = rindex(execProg, '/')) == NULL)
+ 		tail = " sh";
+-	    sprintf(buff, "-%s", tail + 1);
++	    snprintf(buff, sizeof(buff), "-%s", tail + 1);
+ 	    execl(execProg, buff, 0);
+ 	}
+ 	fprintf(errfp, "KON> couldn't exec shell\r\n");
+diff -Naur kon2-0.3.9b/src/display/j31sx.c kon2-0.3.9b.oden/src/display/j31sx.c
+--- kon2-0.3.9b/src/display/j31sx.c	1997-01-24 01:38:09.000000000 +0100
++++ kon2-0.3.9b.oden/src/display/j31sx.c	2007-03-18 18:43:57.000000000 +0100
+@@ -47,7 +47,7 @@
+ #include	<string.h>
+ #include	<unistd.h>
+ #include	<sys/mman.h>
+-#include	<linux/mm.h>
++/* #include	<linux/mm.h> */
+ #include	<sys/kd.h>
+ #undef free
+ #include	<stdlib.h>
+diff -Naur kon2-0.3.9b/src/display/s3.c kon2-0.3.9b.oden/src/display/s3.c
+--- kon2-0.3.9b/src/display/s3.c	1997-06-15 13:30:41.000000000 +0200
++++ kon2-0.3.9b.oden/src/display/s3.c	2007-03-18 18:43:57.000000000 +0100
+@@ -43,7 +43,6 @@
+ #include	<string.h>
+ #include	<unistd.h>
+ #include	<sys/mman.h>
+-#include	<linux/mm.h>
+ #include	<sys/kd.h>
+ #undef free
+ #include	<stdlib.h>
+diff -Naur kon2-0.3.9b/src/display/vga.c kon2-0.3.9b.oden/src/display/vga.c
+--- kon2-0.3.9b/src/display/vga.c	2000-04-09 03:17:04.000000000 +0200
++++ kon2-0.3.9b.oden/src/display/vga.c	2007-03-18 18:43:57.000000000 +0100
+@@ -44,6 +44,7 @@
+ #if defined(linux)
+ /* #include	<linux/mm.h> */
+ #include	<sys/kd.h>
++#include	<sys/io.h>
+ #elif defined(__FreeBSD__)
+ #include      <vm/vm_param.h>
+ #include      <sys/ioctl.h>
+@@ -111,6 +112,8 @@
+ static	u_short	fmPattern;		 /* bit pattern to modify font; skip line if bit clear */
+ #endif
+ 
++void VgaLoadStaticFont ();
++
+ void VgaSetRegisters(struct vgaRegs *regs)
+ {
+     int	i;
+@@ -190,7 +193,7 @@
+ static inline
+ void	VgaSetColor(u_char col)
+ {
+-    static	old;
++    static	u_char old;
+     
+     if (old == col) return;
+     PortOutw(col << 8, VGAGRP_ADDR);
+@@ -692,7 +695,7 @@
+ 				    GRAPH_BASE
+ 				    );
+     close(devMem);
+-    if ((long)gramMem < 0) {
++    if (gramMem == (unsigned char *)-1) {
+ 	perror("mmap");
+ 	return FAILURE;
+     }
+diff -Naur kon2-0.3.9b/src/errors.c kon2-0.3.9b.oden/src/errors.c
+--- kon2-0.3.9b/src/errors.c	2000-04-09 01:56:44.000000000 +0200
++++ kon2-0.3.9b.oden/src/errors.c	2007-03-18 18:43:57.000000000 +0100
+@@ -50,7 +50,7 @@
+ 		vfprintf(stderr, format, args);
+ 	} else {
+ 		VtEmu(head, strlen(head));
+-		vsprintf(buf, format, args);
++		vsnprintf(buf, MAX_MSGLEN, format, args);
+ 		VtEmu(buf, strlen(buf));
+ 	}
+ #endif
+diff -Naur kon2-0.3.9b/src/main.c kon2-0.3.9b.oden/src/main.c
+--- kon2-0.3.9b/src/main.c	2000-04-09 03:06:14.000000000 +0200
++++ kon2-0.3.9b.oden/src/main.c	2007-03-18 18:43:57.000000000 +0100
+@@ -30,15 +30,42 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <unistd.h>
++#include <sys/stat.h>
++#include <sys/sysmacros.h>
++#if defined(linux)
++#include <linux/major.h>
++#endif
+ 
+ #include <getcap.h>
+ 
+ #include <version.h>
+ #include <term.h>
+ 
+-void
++void KonInit ();
++void KonStart ();
++
++int
++check_tty ()
++{
++    struct stat device_stat;
++
++    if (stat(ttyname(STDIN_FILENO), &device_stat) == -1)
++	return -1;
++    if (major(device_stat.st_rdev) != TTY_MAJOR)
++	return -1;
++
++    return 0;
++}
++
++int
+ main(int argc, const char *argv[])
+ {
++
++    if (check_tty ()) {
++	fprintf(stderr, "You can run this Kon at only console terminal.\n");
++	exit(EXIT_FAILURE);
++    }
++
+ #ifdef	MINI_KON
+     fprintf(stderr, "Kanji ON Console MINI " VERSION "\n\n");
+ #else
+@@ -50,4 +77,6 @@
+     }
+     KonInit(argc - 1, argv + 1);
+     KonStart(TRUE);
++
++    return 0;
+ }
+diff -Naur kon2-0.3.9b/src/mouse.c kon2-0.3.9b.oden/src/mouse.c
+--- kon2-0.3.9b/src/mouse.c	2000-05-08 10:24:17.000000000 +0200
++++ kon2-0.3.9b.oden/src/mouse.c	2007-03-18 18:43:57.000000000 +0100
+@@ -34,6 +34,7 @@
+ #ifndef	MINI_KON
+ 
+ #include	<unistd.h>
++#include <sys/types.h>
+ #include	<defs.h>
+ #include	<mouse.h>
+ 
+@@ -48,7 +49,6 @@
+ #include	<termios.h>
+ #include	<fcntl.h>
+ #include	<string.h>
+-
+ #include	<getcap.h>
+ 
+ #include	<errors.h>
+@@ -159,7 +159,7 @@
+ 	char *name;
+ 
+ 	name = malloc(strlen(config) + 1);
+-	sscanf(config, "%s", name);
++	sscanf(config, "%s", name);	/* ok, name[strlen(config)+1] */
+ 
+ 	if (mouseDev) free(mouseDev);
+ 	mouseDev = strdup(name);
+@@ -183,7 +183,7 @@
+ 	mouseType = MOUSE_NONE;
+ 	mInfo.has_mouse = FALSE;
+ 	name = malloc(strlen(config) + 1);
+-	sscanf(config, "%s", name);
++	sscanf(config, "%s", name);	/* ok, name[strlen(config)+1] */
+ 	for (p = mice; p->name != NULL; p++) {
+ 		if (strcasecmp(name, p->name) == 0) {
+ 			mouseType = p->type;
+@@ -216,7 +216,7 @@
+ void	MouseSetBaud(int mfd, u_short baud, u_short cflag)
+ {
+ 	struct termios mio;
+-	char	*cf;
++	char	*cf = "*q";
+ 
+ 	tcgetattr(mfd, &mio);
+ 
+@@ -364,7 +364,7 @@
+ void	MouseGetPacket(u_char *buff, int size)
+ {
+ 	static u_char	packet[MAX_PK_SIZE];
+-	static	stat = 0;
++	static	int stat = 0;
+ 	int	n;
+ 
+ 	for (n = 0; n < size; n ++, buff ++) {
+diff -Naur kon2-0.3.9b/src/sock.c kon2-0.3.9b.oden/src/sock.c
+--- kon2-0.3.9b/src/sock.c	2000-04-09 01:55:53.000000000 +0200
++++ kon2-0.3.9b.oden/src/sock.c	2007-03-18 18:43:57.000000000 +0100
+@@ -86,9 +86,9 @@
+     struct	sockaddr sinfo;
+ 
+ #if defined(linux)
+-    sprintf(sinfo.sa_data, "/tmp/.kon%s", tty);
++    snprintf(sinfo.sa_data, sizeof(sinfo.sa_data), "/tmp/.kon%s", tty);
+ #elif defined(__FreeBSD__)
+-    sprintf(sinfo.sa_data, "/tmp/.kon");
++    snprintf(sinfo.sa_data, sizeof(sinfo.sa_data), "/tmp/.kon");
+ #endif
+     unlink(sinfo.sa_data);
+     if ((sfd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0) {
+diff -Naur kon2-0.3.9b/src/term.c kon2-0.3.9b.oden/src/term.c
+--- kon2-0.3.9b/src/term.c	2000-04-10 06:57:23.000000000 +0200
++++ kon2-0.3.9b.oden/src/term.c	2007-03-18 18:43:57.000000000 +0100
+@@ -25,6 +25,9 @@
+  * 
+  */
+ 
++/* #define ErrorF(x,y)  fprintf(stderr,x,y); */
++#define ErrorF(x,y)  
++
+ #include	<stdio.h>
+ #include	<stdlib.h>
+ #include	<unistd.h>
+@@ -58,6 +61,7 @@
+ #include	<child.h>
+ #include	<interface.h>
+ #include	<sock.h>
++#include	<pty.h>
+ #ifdef	MINI_KON
+ static int mouseFd=-1;
+ #else
+@@ -81,6 +85,9 @@
+ static char	ptyName[MAX_TTYNAME + 1];
+ static int orgVtNum = -1;
+ 
++static void ChangeNewConsole ();
++void RunStartupCmd ();
++
+ struct initInfo {
+     bool display;			 /* display initialized */
+     bool utmp;			 /* utmp set */
+@@ -180,10 +187,11 @@
+     numFds = masterPty + 1;
+ #else
+     FD_SET(sockFd, &orgReadFds);
+-    if (mInfo.has_mouse && mouseFd > 0)
++    if (mInfo.has_mouse)
+ 	MouseSetRfd(mouseFd);
+     else
+ 	MouseResetRfd(mouseFd);
++    numFds = (masterPty < numFds) ? numFds : masterPty + 1;
+ #endif
+     /* Note: we use timeout on select call even if cursor blink is off
+        because of screen saver and mouse cursor timeout. */
+@@ -197,8 +205,16 @@
+ 	    tv.tv_sec = 0;
+ 	    tv.tv_usec = 100000; /* 0.1 sec */
+ 	    v = select(numFds, &readFds, NULL, NULL, &tv);
+-	} while (v == 0 || (v < 0 && (errno == EINTR || mouseFd < 0)));
++	} while (v == 0 || (v < 0 && 
++			(errno == EINTR || mouseFd < 0 ||
++				(errno == EBADF && mInfo.has_mouse))));
+ 	if (v < 0) {
++		ErrorF("v: %d\r\n", v);
++		ErrorF("numFds: %d\r\n", numFds);
++		ErrorF("masterPty: %d\r\n", masterPty);
++		ErrorF("sockFd: %d\r\n", sockFd);
++		ErrorF("mouseFd: %d\r\n", mouseFd);
++		ErrorF("errno: %d\r\n", errno);
+ 	    PerrorExit("select");
+ 	}
+ 	if (FD_ISSET(masterPty, &readFds)) {
+@@ -235,7 +251,10 @@
+ 	if (FD_ISSET(sockFd, &readFds)) SocketInterface(sockFd);
+ 	if (mInfo.has_mouse && mouseFd > 0) {
+ 	    if (FD_ISSET(mouseFd, &readFds) && con.active) {
+-		i = read(mouseFd, buff, BUFSIZ);
++                i = -1;
++                if(mouseFd > 0) {
++                        i = read(mouseFd, buff, BUFSIZ);
++                }
+ 		if (i > 0) MouseGetPacket(buff, i);
+ 		PollCursor(TRUE);
+ 	    }
+@@ -248,7 +267,7 @@
+ {
+     int	i = 0;
+     const	char *video = "NORMAL";
+-    extern int ConfigExecProg(const char *);
++    extern int ConfigExecProg(const char *,char *const args[]);
+     
+     if (argc > 0 && argv[0][0] != '-') {
+ 	video = argv[0];
+@@ -268,8 +287,10 @@
+ 	    KonError("no value for `%s'\r\n", arg);
+ 	    break;
+ 	}
+-	if (!strcasecmp(arg, "e"))
+-	    ConfigExecProg(argv[i]);
++	if (!strcasecmp(arg, "e")){
++	    ConfigExecProg(argv[i],&(argv[i]));
++	    break;
++	}
+ 	else if (SetCapArg(arg, argv[i]) < 0)
+ 	    KonWarn("invalid capability `%s' ignored\r\n", arg);
+ 	i++;
+@@ -279,6 +300,8 @@
+ static int	savedArgc;		 /* argc of startup time */
+ static const char	**savedArgv;	 /* argv of startup time */
+ 
++static void ChangeNewConsole();
++
+ /* Do initialization before reading config file */
+ void
+ KonInit(int argc, const char *argv[])
+@@ -288,7 +311,6 @@
+     init.display = init.utmp = init.socket = init.termios = FALSE;
+     /* Initialize subsystems. */
+     
+-    ChangeNewConsole();
+     CapInit();
+ 
+ #ifndef	MINI_KON
+@@ -321,8 +343,9 @@
+     CapInit();
+     ConsoleCleanup();
+ #ifndef	MINI_KON
+-    if (mInfo.has_mouse)
++    if (mInfo.has_mouse && mouseFd > 0) {
+ 	MouseCleanup();
++    }
+     MouseInit();
+ #endif
+ #if 0
+@@ -357,8 +380,9 @@
+ 	TryTermReset(0, (const char **)NULL) < 0)
+ 	KonFatal("giving up\r\n");
+ #ifndef	MINI_KON
+-    if (mInfo.has_mouse)
++    if (mInfo.has_mouse) {
+ 	mouseFd = MouseStart();
++    }
+ #endif
+     VtStart();
+     ConsoleStart();
+@@ -388,21 +412,15 @@
+     char	ls, ln;
+ #ifdef	MINI_KON
+     extern void LoadMiniFont();
++#else
++    RunStartupCmd();
+ #endif
+     
+-    /* Open PTY(master) */
+-    for (ls = 'p'; ls <= 's'; ls ++) {
+-	for (ln = 0; ln <= 0xF; ln ++) {
+-	    sprintf(ptyName, "/dev/pty%1c%1x", ls, ln);
+-	    if ((masterPty = open(ptyName, O_RDWR)) >= 0) break;
+-	}
+-	if (masterPty >= 0) break;
+-    }
+-    if (masterPty < 0) {
+-	KonMessage("can not get master pty\r\n");
+-	PerrorExit(ptyName);
++    /* Open PTY */
++    if (openpty (&masterPty, &slavePty, ptyName, NULL, NULL) == -1) {
++	KonMessage ("cannot open PTY\r\n");
++	PerrorExit ("openpty");
+     }
+-    ptyName[5] = 't';
+ 
+ #ifndef	MINI_KON
+     if (mInfo.has_mouse) {
+@@ -411,7 +429,6 @@
+ #endif
+ 
+ #ifndef	MINI_KON
+-    chown("/dev/tty0", getuid(), getgid());
+ #if defined(linux)
+     sockFd = SocketInit(TermName() + 8);
+ #elif defined(__FreeBSD__)
+@@ -495,10 +512,6 @@
+ 	  }
+ 	}
+ #endif
+-	/* Open TTY(slave) */
+-	if ((slavePty = open(ptyName, O_RDWR)) < 0) {
+-	    PerrorExit(ptyName);
+-	}
+ 	close(masterPty);
+ 	/* Set old tio to TTY */
+ 	tcsetattr(slavePty, TCSAFLUSH, &oldTio);
+@@ -571,9 +584,9 @@
+     }
+     setsid();
+ #if defined(linux)
+-    sprintf(vtty, "/dev/tty%d", vtNum);
++    snprintf(vtty, sizeof(vtty), "/dev/tty%d", vtNum);
+ #elif defined(__FreeBSD__)
+-    sprintf(vtty, "/dev/ttyv%d", vtNum);
++    snprintf(vtty, sizeof(vtty), "/dev/ttyv%d", vtNum);
+ #endif
+     if ((vfd = open(vtty, O_RDWR)) < 0)
+ 	KonFatal("can't open %s", vtty);
+diff -Naur kon2-0.3.9b/src/utmp.c kon2-0.3.9b.oden/src/utmp.c
+--- kon2-0.3.9b/src/utmp.c	1997-08-07 06:52:03.000000000 +0200
++++ kon2-0.3.9b.oden/src/utmp.c	2007-03-18 18:43:57.000000000 +0100
+@@ -45,6 +45,8 @@
+ #include	<utmp.h>
+ #include	<grp.h>
+ #include	<sys/stat.h>
++#include	<time.h>
++#include	<utmp.h>
+ 
+ static int ttyGid;
+ 
+@@ -56,16 +58,21 @@
+ 	struct group	*ttygrp;
+ 	char	*tn;
+ 
++#define	PTYCHARLEN	4
+ 	pw = getpwuid(getuid());
+-	tn = rindex(tty, '/') + 1;
++	if (strlen (tty) <= PTYCHARLEN) {
++		tn = tty;
++	} else {
++		tn = tty + strlen (tty) - PTYCHARLEN;
++	}
+ 	memset((char *)&utmp, 0, sizeof(utmp));
+-	strncpy(utmp.ut_id, tn + 3, sizeof(utmp.ut_id));
++	strncpy(utmp.ut_id, tn, sizeof(utmp.ut_id));
+ 	utmp.ut_type = DEAD_PROCESS;
+ 	setutent();
+ 	getutid(&utmp);
+ 	utmp.ut_type = USER_PROCESS;
+ 	utmp.ut_pid = getpid();
+-	strncpy(utmp.ut_line, tn, sizeof(utmp.ut_line));
++	strncpy(utmp.ut_line, tty + strlen ("/dev/"), sizeof(utmp.ut_line));
+ 	strncpy(utmp.ut_user, pw->pw_name, sizeof(utmp.ut_user));
+ 	time(&(utmp.ut_time));
+ 	pututline(&utmp);
+@@ -85,7 +92,11 @@
+ 	struct utmp	utmp, *utp;
+ 	char	*tn;
+ 
+-	tn = rindex(tty, '/') + 4;
++	if (strlen (tty) <= PTYCHARLEN) {
++		tn = tty;
++	} else {
++		tn = tty + strlen (tty) - PTYCHARLEN;
++	}
+ 	memset((char *)&utmp, 0, sizeof(utmp));
+ 	strncpy(utmp.ut_id, tn, sizeof(utmp.ut_id));
+ 	utmp.ut_type = USER_PROCESS;
+diff -Naur kon2-0.3.9b/src/vc.c kon2-0.3.9b.oden/src/vc.c
+--- kon2-0.3.9b/src/vc.c	2000-05-08 10:25:45.000000000 +0200
++++ kon2-0.3.9b.oden/src/vc.c	2007-03-18 18:43:57.000000000 +0100
+@@ -33,6 +33,7 @@
+ #include	<unistd.h>
+ #if defined(linux)
+ #include	<sys/vt.h>
++#include	<sys/io.h>
+ #endif
+ #include	<fcntl.h>
+ #include	<signal.h>
+@@ -716,7 +717,7 @@
+ 
+ static void	ShowCursor(struct cursorInfo *c, bool show)
+ {
+-    if (!con.active || !c->sw)
++    if (!con.active || (!c->shown && !c->sw))
+ 	return;
+     if (c->shown != show)
+ 	ToggleCursor(c);
+@@ -775,7 +776,7 @@
+ 	return;
+     }
+     if ((cInfo.interval > 0) && (++cInfo.count == cInfo.interval)) {
+-	ToggleCursor(&cInfo);
++        ShowCursor(&cInfo, !cInfo.shown);
+     }
+ #ifndef	MINI_KON
+     if (mInfo.has_mouse) {
+@@ -830,7 +831,7 @@
+     char *name;
+     
+     name = malloc(strlen(config) + 1);
+-    sscanf(config, "%s", name);
++    sscanf(config, "%s", name);	/* ok, name[strlen(config)+1] */
+     for (v = videos; v->name != NULL; v++) {
+ 	if (strcasecmp(name, v->name) == 0) {
+ 	    config = strchr(config, '\n');
+diff -Naur kon2-0.3.9b/src/vt.c kon2-0.3.9b.oden/src/vt.c
+--- kon2-0.3.9b/src/vt.c	1997-09-19 03:45:44.000000000 +0200
++++ kon2-0.3.9b.oden/src/vt.c	2007-03-18 18:43:57.000000000 +0100
+@@ -212,12 +212,12 @@
+ 	if (arg == 6) {
+ 	    int x = (con.x < con.xmax) ? con.x : con.xmax;
+ 	    int y = (con.y < con.ymax) ? con.y : con.ymax;
+-	    sprintf(report, "\x1B[%d;%dR", y + 1, x + 1);
++	    snprintf(report, sizeof(report), "\x1B[%d;%dR", y + 1, x + 1);
+ 	} else if (arg == 5)
+-	    strcpy(report, "\x1B[0n\0");
++	    strcpy(report, "\x1B[0n\0");	/* ok */
+ 	break;
+     case 'c':
+-	if (arg == 0) strcpy(report, "\x1B[?6c\0");
++	if (arg == 0) strcpy(report, "\x1B[?6c\0");	/* ok */
+ 	break;
+     }
+     write(masterPty, report, strlen(report));
+@@ -248,10 +248,11 @@
+     ioctl(masterPty, TIOCSWINSZ, &win);
+ }
+ 
++static void EscBracket(u_char);
++
+ static void
+ EscStatusLine(u_char mode)
+ {
+-    static void EscBracket(u_char);
+     static struct attrStack *asp;
+ 
+     switch(mode) {
+@@ -303,7 +304,7 @@
+     if (ch >= '0' && ch <= '9') {
+ 	varg[narg] = (varg[narg] * 10) + (ch - '0');
+     } else if (ch == ';') {
+-	/* 引数は MAX_NARG までしかサポートしない!! */
++ 	/* only support as args less than MAX_NARG */
+ 	if (narg < MAX_NARG) {
+ 	    narg ++;
+ 	    varg[narg] = 0;
+@@ -688,11 +689,13 @@
+ 
+ static int	ConfigCoding(const char *confstr)
+ {
+-    char reg[3][MAX_COLS];
++  char *reg[3];
+     int n, i;
+ 
++    for(i = 0; i < 3 ; i++)
++      reg[i] = malloc(strlen(confstr) + 1);
+     *reg[0] = *reg[1] = *reg[2] = '\0';
+-    sscanf(confstr, "%s %s %s", reg[0], reg[1], reg[2]);
++    sscanf(confstr, "%s %s %s", reg[0], reg[1], reg[2]); /* safe, enough space allocated for reg[0,1,2] */
+     for (i = 0; i < 3 && *reg[i]; i ++) {
+ 	n = (int)CodingByRegistry(reg[i]);
+ 	if (n < 0) {
+diff -Naur kon2-0.3.9b/terminfo.kon kon2-0.3.9b.oden/terminfo.kon
+--- kon2-0.3.9b/terminfo.kon	1997-06-16 05:04:43.000000000 +0200
++++ kon2-0.3.9b.oden/terminfo.kon	2007-03-18 18:43:57.000000000 +0100
+@@ -1,5 +1,5 @@
+ kon|kanji on console,
+-	am, bce, ccc, eo, mir, msgr, xenl, xon, 
++	am, ccc, eo, mir, msgr, xenl, xon, 
+ 	colors#8, cols#80, it#8, lines#25, ncv#3, pairs#64, 
+ 	acsc=`\004a\261f\370g\361h\260j\331k\277l\332m\300n\305o~q\304r\362s_t\303u\264v\301w\302x\263y\371z\372{\373|\374}\375~\376.\031-\030\054\021+^P0\333p\304r\304y\363z\362{\343|\330}\234, 
+ 	bel=^G, blink=\E[5m, bold=\E[1m, civis=\E[?25l, 
+diff -Naur kon2-0.3.9b/tools/Configure.linux kon2-0.3.9b.oden/tools/Configure.linux
+--- kon2-0.3.9b/tools/Configure.linux	2000-04-10 09:49:51.000000000 +0200
++++ kon2-0.3.9b.oden/tools/Configure.linux	2007-03-18 18:43:57.000000000 +0100
+@@ -61,7 +61,7 @@
+ TOPDIR	= 
+ BINDIR	= $(TOPDIR)/usr/bin
+ LIBDIR	= $(TOPDIR)/etc
+-MANDIR	= $(TOPDIR)/usr/man/ja_JP.ujis/man1
++MANDIR	= $(TOPDIR)/usr/share/man/ja/man1
+ CONFIG_NAME = kon.cfg
+ OPTS    = -DCONFIG_NAME=\"$(LIBDIR)/$(CONFIG_NAME)\" -I$(INCDIR)
+ ifdef	MINI_KON
+@@ -69,7 +69,7 @@
+ else
+ CFLAGS  += -O2 -Wall $(OPTS)
+ endif
+-LD      = gcc $(CFLAGS)
++LD      = gcc $(CFLAGS) -lutil
+ RM      = rm -f
+ INSTALL = install -c -s
+ 
+@@ -84,7 +84,10 @@
+ 	echo '/*' $mess '*/' >>$CONFIG_H
+ 	read sig def
+ 	echo -n $mess '['$def']? '
+-	read ans < /dev/tty
++	#Please modify ../config.linux
++	#read ans < /dev/tty
++	ans=""
++	echo
+ 	if [ "$ans" = "" ]
+ 	then
+ 		ans=$def
+diff -Naur kon2-0.3.9b/tools/logto.c kon2-0.3.9b.oden/tools/logto.c
+--- kon2-0.3.9b/tools/logto.c	1993-03-08 20:49:46.000000000 +0100
++++ kon2-0.3.9b.oden/tools/logto.c	2007-03-18 18:43:57.000000000 +0100
+@@ -21,7 +21,7 @@
+ 		len = 0;
+ 	} else {
+ 		getcwd(path, _POSIX_PATH_MAX);
+-		sprintf(name, "%s/%s", path, argv[1]);
++		snprintf(name, sizeof(name), "%s/%s", path, argv[1]);
+ 		len = strlen(name) + 1;
+ 	}
+ 	SocketSendStr(s, STR_LOGTO);
+diff -Naur kon2-0.3.9b/tools/Makefile kon2-0.3.9b.oden/tools/Makefile
+--- kon2-0.3.9b/tools/Makefile	2000-04-10 07:36:25.000000000 +0200
++++ kon2-0.3.9b.oden/tools/Makefile	2007-03-18 18:43:57.000000000 +0100
+@@ -12,7 +12,7 @@
+ endif
+ CC:=$(CC) -g
+ 
+-LDFLAGS = -N
++LDFLAGS = # -N
+ LOADLIBES = $(LIB)
+ 
+ all:	$(TOOLS) $(SYSTOOLS)
+diff -Naur kon2-0.3.9b/tools/mkminifont.c kon2-0.3.9b.oden/tools/mkminifont.c
+--- kon2-0.3.9b/tools/mkminifont.c	2000-04-10 08:49:47.000000000 +0200
++++ kon2-0.3.9b.oden/tools/mkminifont.c	2007-03-18 18:43:57.000000000 +0100
+@@ -1,8 +1,12 @@
+ #include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
+ #include <errno.h>
+ #include <interface.h>
+ #include <fnld.h>
+ 
++unsigned char *LoadFontFile ();
++
+ struct _fontent {
+     unsigned short code;
+     unsigned char bitmap[32];
+@@ -25,7 +29,7 @@
+ 	} else path = argv[i];
+     }
+     if (!path) {
+-	printf("usage: %s [minix font file]\n");
++	printf("usage: %s [minix font file]\n", argv[0]);
+ 	exit(1);
+     }
+     if ((font = LoadFontFile(path, "minix", 0)) == NULL) {
+diff -Naur kon2-0.3.9b/tools/newvc.c kon2-0.3.9b.oden/tools/newvc.c
+--- kon2-0.3.9b/tools/newvc.c	1993-03-15 23:26:11.000000000 +0100
++++ kon2-0.3.9b.oden/tools/newvc.c	2007-03-18 18:43:57.000000000 +0100
+@@ -96,7 +96,7 @@
+     if (newVcNum < 0) {
+ 	error("can't find unused virtual console", NULL);
+     }
+-    sprintf(newTtyName, "/dev/tty%d", newVcNum);
++    snprintf(newTtyName, sizeof(newTtyName), "/dev/tty%d", newVcNum);
+ 
+     setsid();
+     
+@@ -135,6 +135,7 @@
+ 
+ 	setuid(getuid());
+ 	setgid(getgid());
++	/* now run as user, not effective uid 0 */
+ 
+ 	if ((shell = getenv("SHELL")) == NULL) {
+ 	    shell = "/bin/sh";
+@@ -152,8 +153,8 @@
+ 
+ 	    command = argv[1];
+ 	    for (i = 1; i < argc; i++) {
+-		strncat(cmdBuf, argv[i], MAXCMDLEN);
+-		strncat(cmdBuf, " ", MAXCMDLEN);
++		strncat(cmdBuf, argv[i], MAXCMDLEN - strlen(cmdBuf));
++		strncat(cmdBuf, " ", MAXCMDLEN - strlen(cmdBuf));
+ 	    }
+ 	}
+ 	newArgv[0] = command;

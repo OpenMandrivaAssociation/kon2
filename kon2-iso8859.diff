@@ -1,0 +1,53 @@
+--- kon2-0.3.9b/kon.cfg.linux.iso8859	Thu Feb  6 01:56:44 1997
++++ kon2-0.3.9b/kon.cfg.linux	Sat Jul  7 11:45:21 2001
+@@ -127,10 +127,8 @@
+ 	zcat /dos/lib/font/jpnhn16x.Z | /usr/bin/fld.fontx -n
+ 	zcat /dos/lib/font/jpnzn16x.Z | /usr/bin/fld.fontx -n
+ minix-gzip:Startup
+-	/usr/bin/fld -t fontx -n /usr/share/fonts/vga.fnt
++	gzip -d < /usr/share/fonts/pubfont.a.gz | /usr/bin/fld -t minix -n
+ 	gzip -d < /usr/share/fonts/pubfont.k.gz | /usr/bin/fld -t minix -n
+-#	gzip -d < /usr/share/fonts/vga.fnt.gz | /usr/bin/fld.fontx -n
+-#	gzip -d < /usr/share/fonts/pubfont.a.gz | /usr/bin/fld.minix -n
+ fontx-gzip:
+ 	gzip -d < /dos/lib/font/jpnhn16x.z | /usr/bin/fld.fontx -n
+ 	gzip -d < /dos/lib/font/jpnzn16x.z | /usr/bin/fld.fontx -n
+@@ -196,18 +194,36 @@
+ #   EUC, SJIS
+ 
+ ja_JP.ujis:Coding
+-	JISX0201.1976-0 JISX0208.1983-0 EUC
++	ISO8859-1 JISX0208.1983-0 EUC
++
++ja_JP.eucJP:Coding
++	ISO8859-1 JISX0208.1983-0 EUC
++
++ja_JP.EUC-JP:Coding
++	ISO8859-1 JISX0208.1983-0 EUC
+ 
+ ja_JP.sjis:
+-	JISX0201.1976-0 JISX0208.1983-0 SJIS
++	ISO8859-1 JISX0208.1983-0 SJIS
+ 
+ zh_TW.big5:
+ 	ISO8859-1 BIG5.HKU-0
+ 
++zh_TW.Big5:
++	ISO8859-1 BIG5.HKU-0
++
+ zh_CN.ugb:
+ 	ISO8859-1 GB2312.1980-0
+ 
++zh_CN.GB2312:
++	ISO8859-1 GB2312.1980-0
++
+ ko_KR.euc:
++	ISO8859-1 KSC5601.1987-0
++					
++ko_KR.eucKR:
++	ISO8859-1 KSC5601.1987-0
++					
++ko_KR.EUC-KR:
+ 	ISO8859-1 KSC5601.1987-0
+ 					
+ # Show `No warranty' message
