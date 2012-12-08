@@ -1,5 +1,4 @@
 sources:
-  "kon2-0.3.9b.tar.bz2:"	65a55e3b6df89b5f6e48cf966483bb4f5e1cd9cf
-  "pubfont.a.gz:"	b2a9cf220888c8cc2c8ee36ee675dd012a223bfb
-  "pubfont.k.gz:"	ce5908f6dd84b01496c77e9ebd5a14f831348cf4
-  "terminfo.kon:"	81704d87de59ae57d6fe65bcac6a0caa8f9a615e
+  "kon2-0.3.9b.tar.bz2": 65a55e3b6df89b5f6e48cf966483bb4f5e1cd9cf
+  "pubfont.a.gz": b2a9cf220888c8cc2c8ee36ee675dd012a223bfb
+  "pubfont.k.gz": ce5908f6dd84b01496c77e9ebd5a14f831348cf4
