@@ -5,7 +5,7 @@
 Summary:	KON - Kanji ON Linux console
 Name:		kon2
 Version:	0.3.9b
-Release:	25
+Release:	26
 License:	BSD
 Group:		System/Internationalization
 Source0:	ftp://ftp.linet.gr.jp/pub/KON/%{name}-%{version}.tar.bz2
