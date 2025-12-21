@@ -15,6 +15,7 @@ Source3:	terminfo.kon
 Patch0:		kon2-iso8859.diff
 Patch1:		kon2-debian_jumbo_patch.diff
 ExclusiveArch:	%{ix86} x86_64
+BuildRequires:	make
 BuildRequires:	glibc-static-devel
 Requires:	ncurses
 Requires:	locales-ja
